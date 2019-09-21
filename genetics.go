@@ -4,6 +4,8 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+
+	"github.com/inlined/rand"
 )
 
 var (
@@ -16,13 +18,6 @@ type Gene int8
 
 // Fitness is an arbitrary fitness number based on genomes and their matching traits.
 type Fitness int64
-
-// Random implements a subset of math/rand.Rand suitable to be swapped for unit testing.
-type Random interface {
-	Int31n(n int32) int32
-	Int63n(n int64) int64
-	Float64() float64
-}
 
 const (
 	geneBits = 4
@@ -183,7 +178,7 @@ type Evolver interface {
 type StandardEvolver struct {
 	CrossoverRate float64
 	MutationRate  int32
-	RNG           Random
+	RNG           rand.Rand
 }
 
 /*

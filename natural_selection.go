@@ -1,8 +1,7 @@
 package genetics
 
 import (
-	"math/rand"
-	"time"
+	"github.com/inlined/rand"
 )
 
 // NaturalSelection is an interface to pick the selection method.
@@ -15,22 +14,16 @@ type NaturalSelection interface {
 	SelectParents(numParents int, fitness []Fitness) (indexes []int)
 }
 
-type sus struct {
-	rng *rand.Rand
-}
-
 // StochasticUniversalSampling creates a "roulette" wheel where each parent
 // gets a slice in proportion to their fitness. We then spin the wheel with
 // two fixed points to select which parents win.
 // If src is nill, a new source is created with the current time.
-func StochasticUniversalSampling(src rand.Source) NaturalSelection {
-	if src == nil {
-		src = rand.NewSource(time.Now().UTC().UnixNano())
-	}
-	return &sus{rng: rand.New(src)}
+type StochasticUniversalSampling struct {
+	Rand rand.Rand
 }
 
-func (s sus) SelectParents(numParents int, fitness []Fitness) (indexes []int) {
+// SelectParents implements the NaturalSelection interface.
+func (s *StochasticUniversalSampling) SelectParents(numParents int, fitness []Fitness) (indexes []int) {
 	totalFitness := Fitness(0)
 	for _, f := range fitness {
 		totalFitness += f
@@ -42,7 +35,7 @@ func (s sus) SelectParents(numParents int, fitness []Fitness) (indexes []int) {
 	distance := totalFitness / Fitness(numParents)
 	// Spin the wheel up to distance (equivalent to spinning the wheel randomly and then taking the modulo
 	// of the size)
-	pos := Fitness(s.rng.Int63n(int64(distance)))
+	pos := Fitness(s.Rand.Int63n(int64(distance)))
 
 	// Iterate through the fitness scores as if it were a roulete wheel (e.g. incrementing f by
 	// fitness[n] rather than one) and remember the indexes which contain any pointers P.
@@ -61,6 +54,8 @@ func (s sus) SelectParents(numParents int, fitness []Fitness) (indexes []int) {
 	return indexes
 }
 
+// RankedSelection weighs 
+
 // Mutator introduces randomness to the population.
 // While mutations should be rare to avoid turning the algorithm into a random
 // walk, some mutations are necessary to enforce convergence.
@@ -75,31 +70,32 @@ type Mutator interface {
 // accept values of any bit size. This is most useful for chromasomes where genes affect
 // independent behavior (e.g. not permutation-based algorithms).
 type RandomResetting struct {
-	RNG  *rand.Rand
+	Rand rand.Rand
 	Freq float32
 }
 
 // Mutate implements the Mutator interface
 func (r *RandomResetting) Mutate(c *Chromosome) {
-	f := r.RNG.Float32()
+	f := r.Rand.Float32()
 	if f > r.Freq {
 		return
 	}
 
-	n := r.RNG.Int31n(int32(len(c.Genes)))
-	v := r.RNG.Int31n(1 << c.Species.BitsPerGene)
+	n := r.Rand.Int31n(int32(len(c.Genes)))
+	v := r.Rand.Int31n(1 << c.Species.BitsPerGene)
 	c.Genes[n] = Gene(v)
 }
 
-// Swapping 
+// Swapping ...
 type Swapping struct {
-	RNG  *rand.Rand
+	Rand rand.Rand
 	Freq float32
 }
 
-func (r *RandomResetting) Mutate(c *Chromosome) {
-	f := r.RNG.Float32()
-	if f > r.Freq {
+// Mutate implements the mutator interface
+func (s *Swapping) Mutate(c *Chromosome) {
+	f := s.Rand.Float32()
+	if f > s.Freq {
 		return
 	}
 
@@ -107,8 +103,8 @@ func (r *RandomResetting) Mutate(c *Chromosome) {
 	// instead calculate both an index and an offset from that index
 	// (wrapping around as a cyclical buffer)
 	len := int32(len(c.Genes))
-	i0 := r.RNG.Int31n(len)
-	d := r.RNG.Int31n(len - 1)
+	i0 := s.Rand.Int31n(len)
+	d := s.Rand.Int31n(len - 1)
 	i1 := (i0 + d) % len
 	v0 := c.Genes[i0]
 	c.Genes[i0] = c.Genes[i1]

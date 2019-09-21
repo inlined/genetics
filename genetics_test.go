@@ -5,7 +5,7 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/inlined/goldmine/pkg/genetics"
+	"github.com/inlined/genetics"
 )
 
 func randomRoundtripSerialization(nBits, nGenes uint8) error {
