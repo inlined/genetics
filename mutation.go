@@ -1,6 +1,17 @@
 package genetics
 
-import "github.com/inlined/rand"
+import (
+	"fmt"
+
+	"github.com/inlined/rand"
+)
+
+const (
+	randomResettingMutation = "RandomResettingMutation"
+	swapMutation            = "SwapMutation"
+	scrambleMutation        = "ScrambleMutation"
+	inversionMutation       = "InversionMutation"
+)
 
 // Mutator introduces randomness to the population.
 // While mutations should be rare to avoid turning the algorithm into a random
@@ -8,6 +19,7 @@ import "github.com/inlined/rand"
 // Mutators work on unpacked Chromosomes because species' bit length is
 // important to some algorithms.
 type Mutator interface {
+	fmt.Stringer
 	Mutate(r rand.Rand, c *Chromosome)
 }
 
@@ -16,6 +28,10 @@ type Mutator interface {
 // accept values of any bit size. This is most useful for chromasomes where genes affect
 // independent behavior (e.g. not permutation-based algorithms).
 type RandomResettingMutation struct{}
+
+func (RandomResettingMutation) String() string {
+	return randomResettingMutation
+}
 
 // Mutate implements the Mutator interface
 func (m RandomResettingMutation) Mutate(r rand.Rand, c *Chromosome) {
@@ -28,6 +44,10 @@ func (m RandomResettingMutation) Mutate(r rand.Rand, c *Chromosome) {
 // SwapMutation is a mutation most appropriate for permutation genes
 // (e.g. graph algorithms)
 type SwapMutation struct{}
+
+func (SwapMutation) String() string {
+	return swapMutation
+}
 
 // Mutate implements the mutator interface
 func (m SwapMutation) Mutate(r rand.Rand, c *Chromosome) {
@@ -48,6 +68,10 @@ func (m SwapMutation) Mutate(r rand.Rand, c *Chromosome) {
 // Genes, such as graph algorithms.
 type ScrambleMutation struct{}
 
+func (ScrambleMutation) String() string {
+	return scrambleMutation
+}
+
 // Mutate implements Mutator
 func (m ScrambleMutation) Mutate(r rand.Rand, c *Chromosome) {
 	s := c.Species
@@ -64,6 +88,10 @@ func (m ScrambleMutation) Mutate(r rand.Rand, c *Chromosome) {
 // in the middle segment. This is most appropraite for permutation-encoded
 // Genes, such as graph algorithms.
 type InversionMutation struct{}
+
+func (InversionMutation) String() string {
+	return inversionMutation
+}
 
 // Mutate implements Mutator
 func (m InversionMutation) Mutate(r rand.Rand, c *Chromosome) {

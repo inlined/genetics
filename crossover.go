@@ -1,15 +1,23 @@
 package genetics
 
 import (
+	"fmt"
 	"math"
 	"sort"
 
 	"github.com/inlined/rand"
 )
 
+const (
+	multiPointCrossover          = "MultiPointCrossover"
+	wholeArithmeticRecombination = "WholeArithmeticRecombination"
+	davisOrderCrossover          = "DavisOrderCrossover"
+)
+
 // Crossover is a strategy for generating two children based
 // on two parents.
 type Crossover interface {
+	fmt.Stringer
 	Crossover(r rand.Rand, a, b Chromosome) (x, y Chromosome)
 }
 
@@ -21,6 +29,10 @@ type Crossover interface {
 // which  might require different int encodings.
 type MultiPointCrossover struct {
 	Points int
+}
+
+func (c MultiPointCrossover) String() string {
+	return fmt.Sprintf("%s(%d)", multiPointCrossover, c.Points)
 }
 
 // Crossover imnplements Crossover.
@@ -49,6 +61,10 @@ func (c MultiPointCrossover) Crossover(r rand.Rand, a, b Chromosome) (x, y Chrom
 // trend towards the average value of the population.
 type WholeArithmeticRecombination struct{}
 
+func (WholeArithmeticRecombination) String() string {
+	return wholeArithmeticRecombination
+}
+
 // Crossover implements Crossover
 func (c WholeArithmeticRecombination) Crossover(r rand.Rand, a, b Chromosome) (x, y Chromosome) {
 	f := r.Float64()
@@ -73,6 +89,10 @@ func (c WholeArithmeticRecombination) Crossover(r rand.Rand, a, b Chromosome) (x
 // left are rotationally filled with the left and right of the other chromosome.
 // OX1 is appropraite for permutative genes, such as graph algorithms.
 type DavisOrderCrossover struct{}
+
+func (DavisOrderCrossover) String() string {
+	return davisOrderCrossover
+}
 
 // Crossover implements Crossover
 func (c DavisOrderCrossover) Crossover(r rand.Rand, a, b Chromosome) (x, y Chromosome) {

@@ -1,9 +1,16 @@
 package genetics
 
 import (
+	"fmt"
 	"sort"
 
 	"github.com/inlined/rand"
+)
+
+const (
+	stochasticUniversalSampling = "StochasticUniversalSampling"
+	rankedSelection             = "RankedSelection"
+	tournamentSelection         = "TournamentSelection"
 )
 
 // NaturalSelection is an interface to pick the selection method.
@@ -13,6 +20,7 @@ import (
 // that implements SelectParents). This would avoid re-generating the roulette wheel in
 // StochasticUniversalSampling
 type NaturalSelection interface {
+	fmt.Stringer
 	SelectParents(rand rand.Rand, numParents int, fitness []Fitness) (indexes []int)
 }
 
@@ -21,6 +29,10 @@ type NaturalSelection interface {
 // two fixed points to select which parents win.
 // If src is nill, a new source is created with the current time.
 type StochasticUniversalSampling struct{}
+
+func (s StochasticUniversalSampling) String() string {
+	return stochasticUniversalSampling
+}
 
 // SelectParents implements the NaturalSelection interface.
 func (s StochasticUniversalSampling) SelectParents(rand rand.Rand, numParents int, fitness []Fitness) (indexes []int) {
@@ -58,6 +70,10 @@ func (s StochasticUniversalSampling) SelectParents(rand rand.Rand, numParents in
 // fitness, but its rank in overall fitness. This ensures that populations trend towards
 // optimal solutions still as the problem is converging.
 type RankedSelection struct{}
+
+func (s RankedSelection) String() string {
+	return rankedSelection
+}
 
 // SelectParents selects parents in proportion to their fitness' rank.
 func (s RankedSelection) SelectParents(rand rand.Rand, numParents int, fitness []Fitness) (indexes []int) {
@@ -107,6 +123,10 @@ func (s RankedSelection) SelectParents(rand rand.Rand, numParents int, fitness [
 // at random and selecting the parent with the greatest fitness.
 type TournamentSelection struct {
 	Size int
+}
+
+func (s TournamentSelection) String() string {
+	return fmt.Sprintf("%s(%d)", tournamentSelection, s.Size)
 }
 
 func (s TournamentSelection) selectOneParent(r rand.Rand, fitness []Fitness) int {
