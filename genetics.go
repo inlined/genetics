@@ -2,7 +2,7 @@ package genetics
 
 import (
 	"container/heap"
-	"encoding/base64"
+	"errors"
 	"fmt"
 
 	"github.com/inlined/rand"
@@ -15,7 +15,7 @@ import (
 
 // Gene is a single trait to control behavior.
 // IF THIS TYPE IS CHANGED FROM BYTE, Species.NewRand() MUST CHANGE
-type Gene = byte
+type Gene = int
 
 // Fitness is an arbitrary fitness number based on genomes and their matching traits.
 type Fitness int64
@@ -28,7 +28,8 @@ type Chromosome struct {
 
 // String prints Gene list of a Chromosome but does not preserve the name of the Species.
 func (c Chromosome) String() string {
-	return base64.StdEncoding.EncodeToString(c.Genes)
+	//return base64.StdEncoding.EncodeToString(c.Genes)
+	return "DEPRECATED"
 }
 
 // Species is a factory for all Genes in a repeated evolutionary experiment.
@@ -93,23 +94,26 @@ func (s *Species) NewPerm(rng rand.Rand) (Chromosome, error) {
 
 // ParseChromosome creates an in-memory representation for Chromosomes encoded with SerializeChromosome
 func (s *Species) ParseChromosome(encoded string) (Chromosome, error) {
-	g, err := base64.StdEncoding.DecodeString(encoded)
-	if err != nil {
-		return Chromosome{}, err
-	}
-
-	if len(g) != int(s.NumGenes) {
-		return Chromosome{}, fmt.Errorf("Species.ParseChromosome(%s); expected %d alleles, got %d", encoded, s.NumGenes, len(g))
-	}
-	for _, a := range g {
-		if a > s.MaxAllele {
-			return Chromosome{}, fmt.Errorf("Chromosome%v has allele %d greater than maximum %d", g, a, s.MaxAllele)
+	/*
+		g, err := base64.StdEncoding.DecodeString(encoded)
+		if err != nil {
+			return Chromosome{}, err
 		}
-	}
-	return Chromosome{
-		Genes:   g,
-		Species: s,
-	}, nil
+
+		if len(g) != int(s.NumGenes) {
+			return Chromosome{}, fmt.Errorf("Species.ParseChromosome(%s); expected %d alleles, got %d", encoded, s.NumGenes, len(g))
+		}
+		for _, a := range g {
+			if a > s.MaxAllele {
+				return Chromosome{}, fmt.Errorf("Chromosome%v has allele %d greater than maximum %d", g, a, s.MaxAllele)
+			}
+		}
+		return Chromosome{
+			Genes:   g,
+			Species: s,
+		}, nil
+	*/
+	return Chromosome{}, errors.New("DEPRECATED")
 }
 
 // Evolver replaces one generation of genes with another
